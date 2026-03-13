@@ -1,0 +1,63 @@
+We’re **rebooting the project from square one**, but this time with **a clear lens: Django templates for client websites, multi-tenant domain routing, and automated V0 generation**. We’ll build it **as a platform-first approach**, not a jumble of features. Here’s the **new blueprint**:
+
+---
+
+## **Phase 0: Strategic Project Reset**
+
+### **Objective**
+
+* Treat Dissafyt as a **“Website-as-a-Service” factory**.
+* Each client gets a **fully rendered Django template website**, hosted anywhere, and pointed to their custom domain.
+* The platform handles **multi-tenancy, CMS updates, and automated generation**, with minimal manual work.
+
+---
+
+### **Step 1: Define the Stack**
+
+**Backend**: Django 4.2+, PostgreSQL
+**Frontend**: Django templates + static assets (JS/CSS)
+**Async Jobs**: Celery + Redis
+**Hosting**: Vercel / Netlify / self-hosted (Docker-ready)
+**Domain Management**: Platform stores domain records, points them after deployment
+**Optional**: Email via cheap CPanel SMTP / Gmail API
+
+> Why this stack: Django templates allow us to **generate and serve client sites immediately**, without waiting for static site builds. Multi-tenancy is built-in via `django-tenants`.
+
+---
+
+### **Step 2: Minimal Viable Architecture**
+
+* **Accounts App** → Authentication & roles (admin/client)
+* **Clients App** → Stores tenant metadata & domains
+* **Websites App** → Template selection, client website config
+* **Templates Engine App** → Manages Django HTML templates for rendering
+* **Deployments App** → Handles V0 API calls and site generation
+* **CMS App** → Dashboard for content edits, media uploads
+
+**Flow:**
+
+1. Client registers → tenant schema created → assigned domain
+2. Select template → V0 API generates content → injected into Django template
+3. Deploy site → platform points domain → client accesses live site
+4. CMS edits → dynamically reflected without full redeploy
+
+---
+
+### **Step 3: Core Principles for This Restart**
+
+1. **Template-first generation**: Every website is a Django template; dynamic content injected per tenant.
+2. **Domain-first multi-tenancy**: Each domain points to the correct tenant schema.
+3. **Automated orchestration**: V0 API integration handles code generation asynchronously.
+4. **MVP focus**: Only the client onboarding → template selection → live website path for now. Everything else (integrations, billing, analytics) is Phase 2.
+
+---
+
+### **Step 4: Immediate Next Actions**
+
+1. Initialize a **new Django project skeleton** with apps as above.
+2. Configure **PostgreSQL with `django-tenants`** for multi-tenant schemas.
+3. Create **basic models**: `Client`, `Domain`, `Template`, `Website`.
+4. Test **tenant routing** using a simple view + domain mapping.
+5. Prepare **template folder structure** and ensure we can render a template for a tenant.
+
+---
