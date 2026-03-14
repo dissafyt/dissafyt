@@ -3,9 +3,7 @@ Django==4.2.7
 gunicorn==25.1.0
 packaging==26.0
 sqlparse==0.5.5
-
-# Optional: local LLM support (requires download of a model file)
-llama-cpp-python==0.1.61
+whitenoise==1.4.0
 
 # Optional: Google GenAI integration (requires GOOGLE_API_KEY)
 google-genai==0.4.0
