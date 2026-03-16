@@ -1,0 +1,53 @@
+{% extends "accounts/base_dashboard.html" %}
+
+{% block header_title %}Gallery{% endblock %}
+
+{% block content %}
+  <div class="grid gap-6 md:grid-cols-[1.3fr,1.2fr]">
+    <div class="rounded-lg bg-white p-6 shadow-sm">
+      <h2 class="text-base font-semibold">Gallery images</h2>
+      <p class="mt-1 text-sm text-slate-600">
+        Add photos of your work, location, or team.
+      </p>
+
+      <div class="mt-4 grid grid-cols-2 gap-3 md:grid-cols-3">
+        {% for item in object_list %}
+          <figure class="overflow-hidden rounded border border-slate-200 bg-slate-50">
+            <img src="{{ item.image.url }}" alt="{{ item.caption }}" class="h-28 w-full object-cover" />
+            {% if item.caption %}
+              <figcaption class="px-2 py-1 text-xs text-slate-600">
+                {{ item.caption }}
+              </figcaption>
+            {% endif %}
+          </figure>
+        {% empty %}
+          <p class="col-span-full text-xs text-slate-500">
+            No gallery images yet. Upload your first image using the form.
+          </p>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="rounded-lg bg-white p-6 shadow-sm">
+      <h3 class="text-sm font-semibold">Upload an image</h3>
+      <form method="post" enctype="multipart/form-data" class="mt-4 space-y-4">
+        {% csrf_token %}
+        {% for field in form %}
+          <div>
+            <label class="block text-sm font-medium" for="{{ field.id_for_label }}">
+              {{ field.label }}
+            </label>
+            {{ field }}
+          </div>
+        {% endfor %}
+        <button
+          type="submit"
+          class="rounded bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800"
+        >
+          Upload image
+        </button>
+      </form>
+    </div>
+  </div>
+{% endblock %}
+
