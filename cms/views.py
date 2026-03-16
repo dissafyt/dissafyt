@@ -1,15 +1,9 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse
-from django.views.generic import CreateView, ListView, UpdateView
+from django.views.generic import FormView, UpdateView
 
 from websites.models import Website
-from .forms import (
-    BusinessProfileForm,
-    GalleryImageForm,
-    ServiceForm,
-    TestimonialForm,
-)
+from .forms import BusinessProfileForm, GalleryImageForm, ServiceForm, TestimonialForm
 from .models import BusinessProfile, GalleryImage, Service, Testimonial
 
 
@@ -38,51 +32,60 @@ class _WebsiteOwnedMixin(LoginRequiredMixin):
         return website
 
 
-class ServiceListCreateView(_WebsiteOwnedMixin, ListView, CreateView):
+class ServiceListCreateView(_WebsiteOwnedMixin, FormView):
     template_name = "cms/services.html"
     form_class = ServiceForm
 
-    def get_queryset(self):
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
         website = self.get_website()
-        return Service.objects.filter(website=website)
+        context["object_list"] = Service.objects.filter(website=website)
+        return context
 
     def form_valid(self, form):
         website = self.get_website()
         form.instance.website = website
+        form.save()
         return super().form_valid(form)
 
     def get_success_url(self):
         return reverse("cms:services")
 
 
-class TestimonialListCreateView(_WebsiteOwnedMixin, ListView, CreateView):
+class TestimonialListCreateView(_WebsiteOwnedMixin, FormView):
     template_name = "cms/testimonials.html"
     form_class = TestimonialForm
 
-    def get_queryset(self):
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
         website = self.get_website()
-        return Testimonial.objects.filter(website=website)
+        context["object_list"] = Testimonial.objects.filter(website=website)
+        return context
 
     def form_valid(self, form):
         website = self.get_website()
         form.instance.website = website
+        form.save()
         return super().form_valid(form)
 
     def get_success_url(self):
         return reverse("cms:testimonials")
 
 
-class GalleryListCreateView(_WebsiteOwnedMixin, ListView, CreateView):
+class GalleryListCreateView(_WebsiteOwnedMixin, FormView):
     template_name = "cms/gallery.html"
     form_class = GalleryImageForm
 
-    def get_queryset(self):
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
         website = self.get_website()
-        return GalleryImage.objects.filter(website=website)
+        context["object_list"] = GalleryImage.objects.filter(website=website)
+        return context
 
     def form_valid(self, form):
         website = self.get_website()
         form.instance.website = website
+        form.save()
         return super().form_valid(form)
 
     def get_success_url(self):
