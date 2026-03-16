@@ -41,6 +41,9 @@ INSTALLED_APPS = [
 
     # Core Dissafyt apps
     "marketing",
+    "accounts",
+    "cms",
+    "websites",
 ]
 
 MIDDLEWARE = [
@@ -123,6 +126,9 @@ USE_TZ = True
 STATIC_URL = "static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
+MEDIA_URL = "/media/"
+MEDIA_ROOT = BASE_DIR / "media"
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
@@ -130,3 +136,21 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # Optional human handoff configuration (used by the marketing LLM API)
 HUMAN_WHATSAPP_NUMBER = os.environ.get("HUMAN_WHATSAPP_NUMBER", "")
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+        },
+    },
+    "root": {
+        "handlers": ["console"],
+        "level": "INFO",
+    },
+    "loggers": {
+        "django.request": {"handlers": ["console"], "level": "INFO", "propagate": False},
+        "dissafyt": {"handlers": ["console"], "level": "INFO", "propagate": False},
+    },
+}

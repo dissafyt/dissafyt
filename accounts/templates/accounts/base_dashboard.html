@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{% block title %}Dissafyt Dashboard{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body class="min-h-screen bg-slate-50 text-slate-900">
+    <div class="flex min-h-screen">
+      <!-- Sidebar -->
+      <aside class="flex w-64 flex-col border-r bg-white">
+        <!-- Logo -->
+        <div class="flex items-center border-b px-5 py-4">
+          <div class="rounded bg-sky-600 px-2 py-1 text-sm font-semibold text-white">
+            Dissafyt
+          </div>
+        </div>
+
+        <!-- Menu -->
+        <nav class="flex-1 overflow-y-auto px-3 py-4">
+          <ul class="space-y-1 text-sm">
+            <li>
+              <a
+                href="{% url 'accounts:dashboard' %}"
+                class="flex items-center rounded px-3 py-2 hover:bg-slate-100"
+              >
+                <span class="mr-2">🏠</span>
+                <span>Overview</span>
+              </a>
+            </li>
+            {% block sidebar_menu %}
+            {% endblock %}
+          </ul>
+        </nav>
+
+        <!-- Profile / logout -->
+        <div class="border-t px-4 py-3">
+          {% if request.user.is_authenticated %}
+            <div class="mb-2 text-xs text-slate-500">
+              Signed in as
+            </div>
+            <div class="mb-3 truncate text-sm font-medium">
+              {{ request.user.get_username }}
+            </div>
+            <form method="post" action="{% url 'accounts:logout' %}">
+              {% csrf_token %}
+              <button
+                type="submit"
+                class="w-full rounded bg-slate-900 px-3 py-2 text-xs font-semibold text-white hover:bg-slate-800"
+              >
+                Log out
+              </button>
+            </form>
+          {% endif %}
+        </div>
+      </aside>
+
+      <!-- Main content -->
+      <main class="flex-1">
+        <header class="border-b bg-white px-6 py-4">
+          <h1 class="text-lg font-semibold">
+            {% block header_title %}Dashboard{% endblock %}
+          </h1>
+          {% block header_subtitle %}{% endblock %}
+        </header>
+
+        <section class="px-6 py-6">
+          {% block content %}{% endblock %}
+        </section>
+      </main>
+    </div>
+  </body>
+  </html>
+

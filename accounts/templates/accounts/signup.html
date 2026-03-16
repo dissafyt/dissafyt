@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sign up • Dissafyt</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body class="flex min-h-screen items-center justify-center bg-slate-50 text-slate-900">
+    <div class="w-full max-w-md rounded-lg bg-white p-8 shadow-sm">
+      <h1 class="text-xl font-semibold">Create your account</h1>
+      <p class="mt-1 text-sm text-slate-600">
+        Start building your business website.
+      </p>
+
+      <form method="post" class="mt-6 space-y-4">
+        {% csrf_token %}
+        {{ form.non_field_errors }}
+
+        {% for field in form %}
+          <div>
+            <label class="block text-sm font-medium" for="{{ field.id_for_label }}">
+              {{ field.label }}
+            </label>
+            {{ field }}
+            {% if field.errors %}
+              <p class="mt-1 text-xs text-rose-600">{{ field.errors|striptags }}</p>
+            {% endif %}
+          </div>
+        {% endfor %}
+
+        <button
+          type="submit"
+          class="mt-2 w-full rounded bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800"
+        >
+          Sign up
+        </button>
+      </form>
+
+      <p class="mt-4 text-center text-xs text-slate-500">
+        Already have an account?
+        <a href="{% url 'accounts:login' %}" class="font-medium text-sky-600 hover:underline">
+          Sign in
+        </a>
+      </p>
+    </div>
+  </body>
+  </html>
+

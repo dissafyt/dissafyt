@@ -1,0 +1,71 @@
+{% extends "accounts/base_dashboard.html" %}
+
+{% block header_title %}
+Website settings
+{% endblock %}
+
+{% block sidebar_menu %}
+  <li>
+    <a
+      href="{% url 'cms:business_profile' %}"
+      class="flex items-center rounded px-3 py-2 hover:bg-slate-100"
+    >
+      <span class="mr-2">🏢</span>
+      <span>Business profile</span>
+    </a>
+  </li>
+  <li>
+    <a
+      href="{% url 'websites:settings' %}"
+      class="flex items-center rounded px-3 py-2 bg-slate-100 font-medium"
+    >
+      <span class="mr-2">🌐</span>
+      <span>Website settings</span>
+    </a>
+  </li>
+{% endblock %}
+
+{% block content %}
+  <div class="max-w-xl rounded-lg bg-white p-6 shadow-sm">
+    <h2 class="text-base font-semibold">Configure your site</h2>
+    <p class="mt-1 text-sm text-slate-600">
+      Choose a URL slug and publishing status. The preview URL will use this slug.
+    </p>
+
+    <form method="post" class="mt-5 space-y-4">
+      {% csrf_token %}
+
+      {% for field in form %}
+        <div>
+          <label class="block text-sm font-medium" for="{{ field.id_for_label }}">
+            {{ field.label }}
+          </label>
+          {{ field }}
+          {% if field.help_text %}
+            <p class="mt-1 text-xs text-slate-500">{{ field.help_text }}</p>
+          {% endif %}
+          {% if field.errors %}
+            <p class="mt-1 text-xs text-rose-600">{{ field.errors|striptags }}</p>
+          {% endif %}
+        </div>
+      {% endfor %}
+
+      <button
+        type="submit"
+        class="rounded bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800"
+      >
+        Save settings
+      </button>
+    </form>
+
+    {% if form.instance.slug %}
+      <div class="mt-6 rounded border border-slate-200 bg-slate-50 p-3 text-xs text-slate-700">
+        Preview URL:
+        <code class="rounded bg-white px-1">
+          /sites/{{ form.instance.slug }}/
+        </code>
+      </div>
+    {% endif %}
+  </div>
+{% endblock %}
+

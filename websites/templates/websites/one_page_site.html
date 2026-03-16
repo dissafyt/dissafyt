@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{{ business.business_name }} — Powered by Dissafyt</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body class="min-h-screen bg-slate-50 text-slate-900">
+    <header class="bg-white/80 backdrop-blur border-b">
+      <div class="mx-auto flex max-w-4xl items-center justify-between px-4 py-4">
+        <div class="flex items-center gap-3">
+          {% if business.logo %}
+            <img
+              src="{{ business.logo.url }}"
+              alt="{{ business.business_name }}"
+              class="h-9 w-9 rounded-full object-cover"
+            />
+          {% endif %}
+          <div>
+            <h1 class="text-xl font-semibold">
+              {{ business.business_name }}
+            </h1>
+            {% if business.description %}
+              <p class="text-xs text-slate-500 line-clamp-1">
+                {{ business.description }}
+              </p>
+            {% endif %}
+          </div>
+        </div>
+        <div class="hidden text-xs text-slate-400 md:block">
+          Powered by Dissafyt
+        </div>
+      </div>
+    </header>
+
+    <main class="mx-auto max-w-4xl px-4 py-10 space-y-10">
+      <section class="grid gap-6 md:grid-cols-[2fr,1.4fr] items-start">
+        <div>
+          <h2 class="text-2xl font-semibold">
+            {{ business.business_name }}
+          </h2>
+          {% if business.description %}
+            <p class="mt-3 text-sm leading-relaxed text-slate-700">
+              {{ business.description }}
+            </p>
+          {% else %}
+            <p class="mt-3 text-sm leading-relaxed text-slate-700">
+              Tell visitors what makes your business different. You can edit this text from your Dissafyt dashboard.
+            </p>
+          {% endif %}
+        </div>
+        <div class="rounded-lg bg-white p-5 shadow-sm">
+          <h3 class="text-sm font-semibold">Contact</h3>
+          <dl class="mt-3 space-y-2 text-sm text-slate-700">
+            {% if business.phone %}
+              <div class="flex justify-between gap-4">
+                <dt class="text-slate-500">Phone</dt>
+                <dd class="text-right">
+                  <a href="tel:{{ business.phone }}" class="text-sky-600 hover:underline">
+                    {{ business.phone }}
+                  </a>
+                </dd>
+              </div>
+            {% endif %}
+            {% if business.email %}
+              <div class="flex justify-between gap-4">
+                <dt class="text-slate-500">Email</dt>
+                <dd class="text-right">
+                  <a href="mailto:{{ business.email }}" class="text-sky-600 hover:underline">
+                    {{ business.email }}
+                  </a>
+                </dd>
+              </div>
+            {% endif %}
+            {% if business.address %}
+              <div class="flex justify-between gap-4">
+                <dt class="text-slate-500">Address</dt>
+                <dd class="text-right">
+                  {{ business.address }}
+                </dd>
+              </div>
+            {% endif %}
+          </dl>
+        </div>
+      </section>
+
+      <section>
+        <h3 class="text-base font-semibold">About</h3>
+        <p class="mt-2 text-sm leading-relaxed text-slate-700">
+          This section can be expanded later with services, testimonials, and gallery content.
+          For now, it keeps your site simple and clear while you finish onboarding inside Dissafyt.
+        </p>
+      </section>
+    </main>
+
+    <footer class="border-t bg-white py-6">
+      <div class="mx-auto flex max-w-4xl items-center justify-between px-4 text-xs text-slate-500">
+        <span>&copy; {{ business.business_name }}{% now " Y" %}</span>
+        <span>Made with Dissafyt</span>
+      </div>
+    </footer>
+  </body>
+  </html>
+
