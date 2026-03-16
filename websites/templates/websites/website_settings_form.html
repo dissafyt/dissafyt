@@ -1,29 +1,6 @@
 {% extends "accounts/base_dashboard.html" %}
 
-{% block header_title %}
-Website settings
-{% endblock %}
-
-{% block sidebar_menu %}
-  <li>
-    <a
-      href="{% url 'cms:business_profile' %}"
-      class="flex items-center rounded px-3 py-2 hover:bg-slate-100"
-    >
-      <span class="mr-2">🏢</span>
-      <span>Business profile</span>
-    </a>
-  </li>
-  <li>
-    <a
-      href="{% url 'websites:settings' %}"
-      class="flex items-center rounded px-3 py-2 bg-slate-100 font-medium"
-    >
-      <span class="mr-2">🌐</span>
-      <span>Website settings</span>
-    </a>
-  </li>
-{% endblock %}
+{% block header_title %}Website settings{% endblock %}
 
 {% block content %}
   <div class="max-w-xl rounded-lg bg-white p-6 shadow-sm">
