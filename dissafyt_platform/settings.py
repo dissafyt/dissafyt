@@ -18,16 +18,31 @@ import dj_database_url
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
+def _env_bool(name: str, default: bool = False) -> bool:
+    value = os.environ.get(name)
+    if value is None:
+        return default
+    return value.strip().lower() in {"1", "true", "yes", "on"}
+
+
+def _env_list(name: str, default: str = "") -> list[str]:
+    raw = os.environ.get(name, default)
+    return [item.strip() for item in raw.split(",") if item.strip()]
+
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-75c3&exnhosjm+za+%7-8w)!)tvq*1=0*f5!dx1w_fjg1my)71"
+SECRET_KEY = os.environ.get("SECRET_KEY", "dev-only-insecure-change-me")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = _env_bool("DEBUG", default=False)
 
-ALLOWED_HOSTS = ["*"]
+ALLOWED_HOSTS = _env_list(
+    "ALLOWED_HOSTS",
+    default="localhost,127.0.0.1,.onrender.com",
+)
 
 
 # Application definition
@@ -145,6 +160,23 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # Optional human handoff configuration (used by the marketing LLM API)
 HUMAN_WHATSAPP_NUMBER = os.environ.get("HUMAN_WHATSAPP_NUMBER", "")
+
+GCP_SERVICE_ACCOUNT_FILENAME = "dissafyt-fbc95c37d13d.json"
+_render_secret_path = Path("/etc/secrets") / GCP_SERVICE_ACCOUNT_FILENAME
+_local_secret_path = BASE_DIR / GCP_SERVICE_ACCOUNT_FILENAME
+GCP_SERVICE_ACCOUNT_PATH = (
+    os.environ.get("GOOGLE_APPLICATION_CREDENTIALS")
+    or os.environ.get("GOOGLE_SERVICE_ACCOUNT_FILE")
+    or (str(_render_secret_path) if _render_secret_path.exists() else str(_local_secret_path))
+)
+
+if GCP_SERVICE_ACCOUNT_PATH and Path(GCP_SERVICE_ACCOUNT_PATH).exists():
+    os.environ.setdefault("GOOGLE_APPLICATION_CREDENTIALS", GCP_SERVICE_ACCOUNT_PATH)
+
+MARKETING_AGENT_QUERY_URL = os.environ.get(
+    "MARKETING_AGENT_QUERY_URL",
+    "https://us-central1-aiplatform.googleapis.com/v1/projects/dissafyt/locations/us-central1/reasoningEngines/6207508948644265984:query",
+)
 
 LOGGING = {
     "version": 1,

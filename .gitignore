@@ -5,3 +5,8 @@ __pycache__/
 /staticfiles/
 .env
 .DS_Store
+
+# Google Cloud service account keys
+dissafyt-fbc95c37d13d.json
+secrets/*.json
+/etc/secrets/*.json
