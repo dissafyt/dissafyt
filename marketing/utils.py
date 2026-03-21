@@ -140,18 +140,18 @@ def generate_llm_response(prompt: str, history: Optional[List[Dict[str, str]]] =
     """Generate an LLM-style response.
 
     Priority:
-            1) If Agent Engine is configured, query Vertex AI Agent Engine.
-            2) Else if `GOOGLE_API_KEY` is configured, use Google GenAI.
-            3) Else if `LLM_MODEL_PATH` is configured, use a local llama-cpp model.
-            4) Otherwise return a placeholder response.
+      1) If Agent Engine is configured, query Vertex AI Agent Engine.
+      2) Else if `GOOGLE_API_KEY` is configured, use Google GenAI.
+      3) Else if `LLM_MODEL_PATH` is configured, use a local llama-cpp model.
+      4) Otherwise return a placeholder response.
     """
 
-        # 1) Vertex AI Agent Engine
-        agent_response = _query_agent_engine(prompt=prompt, history=history)
-        if agent_response:
-                return agent_response
+    # 1) Vertex AI Agent Engine
+    agent_response = _query_agent_engine(prompt=prompt, history=history)
+    if agent_response:
+        return agent_response
 
-        # 2) Google GenAI (requires GOOGLE_API_KEY)
+    # 2) Google GenAI (requires GOOGLE_API_KEY)
     google_api_key = os.environ.get("GOOGLE_API_KEY")
     if google_api_key:
         try:
