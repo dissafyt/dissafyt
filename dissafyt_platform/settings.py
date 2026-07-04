@@ -163,9 +163,9 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 HUMAN_WHATSAPP_NUMBER = os.environ.get("HUMAN_WHATSAPP_NUMBER", "")
 
 # Consultation-first pricing scaffold.
-CONSULTATION_BOOKING_FEE = Decimal(os.environ.get("CONSULTATION_BOOKING_FEE", "100.00"))
 HOURLY_CONSULTATION_RATE = Decimal(os.environ.get("HOURLY_CONSULTATION_RATE", "250.00"))
 HAIRCUT_MONTHLY_RETAINER = Decimal(os.environ.get("HAIRCUT_MONTHLY_RETAINER", "100.00"))
+TWICE_HAIRCUT_MONTHLY_RETAINER = Decimal(os.environ.get("TWICE_HAIRCUT_MONTHLY_RETAINER", "200.00"))
 FULL_RETAINER_MONTHLY = Decimal(os.environ.get("FULL_RETAINER_MONTHLY", "350.00"))
 
 # Payfast settings for future checkout/subscription integration.
@@ -176,6 +176,9 @@ PAYFAST_RETURN_URL = os.environ.get("PAYFAST_RETURN_URL", "")
 PAYFAST_CANCEL_URL = os.environ.get("PAYFAST_CANCEL_URL", "")
 PAYFAST_NOTIFY_URL = os.environ.get("PAYFAST_NOTIFY_URL", "")
 PAYFAST_ENVIRONMENT = os.environ.get("PAYFAST_ENVIRONMENT", "sandbox")
+PAYFAST_CURRENCY = os.environ.get("PAYFAST_CURRENCY", "ZAR")
+PAYFAST_SUBSCRIPTION_MODE = _env_bool("PAYFAST_SUBSCRIPTION_MODE", default=True)
+BOOKING_WEBHOOK_SECRET = os.environ.get("BOOKING_WEBHOOK_SECRET", "")
 
 GCP_SERVICE_ACCOUNT_FILENAME = "dissafyt-fbc95c37d13d.json"
 _render_secret_path = Path("/etc/secrets") / GCP_SERVICE_ACCOUNT_FILENAME

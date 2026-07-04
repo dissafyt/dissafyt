@@ -3,144 +3,217 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Dissafyt — Launch a business website</title>
-
-    <!-- Tailwind (via CDN) for minimal setup -->
+    <title>Dissafyt — Book and subscribe</title>
     <script src="https://cdn.tailwindcss.com"></script>
   </head>
 
-  <body class="min-h-screen bg-gray-50 text-slate-900">
-    <header class="border-b bg-white py-6">
-      <div class="mx-auto flex max-w-4xl items-center justify-between px-4">
+  <body class="min-h-screen bg-[#07111f] text-slate-100">
+    <div class="absolute inset-x-0 top-0 -z-10 h-[32rem] bg-[radial-gradient(circle_at_top,rgba(14,165,233,0.35),transparent_45%),radial-gradient(circle_at_right,rgba(16,185,129,0.22),transparent_32%),linear-gradient(180deg,#07111f_0%,#07111f_56%,#0b1729_100%)]"></div>
+    <header class="sticky top-0 z-20 border-b border-white/10 bg-[#07111f]/85 backdrop-blur">
+      <div class="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 md:px-6">
         <div>
-          <h1 class="text-2xl font-semibold">Dissafyt</h1>
-          <p class="text-sm text-slate-600">Consultation-first bookings, pricing, and subscriptions for your salon or business.</p>
+          <p class="text-xs uppercase tracking-[0.35em] text-cyan-300/80">Dissafyt</p>
+          <h1 class="text-lg font-semibold text-white md:text-xl">Subscriptions, bookings, and WhatsApp appointments</h1>
+        </div>
+        <div class="hidden items-center gap-3 md:flex">
+          <a href="#plans" class="rounded-full border border-white/15 px-4 py-2 text-sm text-slate-200 hover:border-cyan-300/50 hover:text-white">Plans</a>
+          <a href="#booking" class="rounded-full bg-cyan-400 px-4 py-2 text-sm font-semibold text-slate-950 hover:bg-cyan-300">Book now</a>
         </div>
       </div>
     </header>
 
-    <main class="mx-auto max-w-4xl px-4 py-10">
+    <main class="mx-auto max-w-6xl px-4 py-8 md:px-6 md:py-12">
       {% if messages %}
         <div class="mb-6 space-y-3">
           {% for message in messages %}
-            <div class="rounded border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-900">
+            <div class="rounded-2xl border border-emerald-300/30 bg-emerald-300/10 px-4 py-3 text-sm text-emerald-50 shadow-lg shadow-emerald-950/10">
               {{ message }}
             </div>
           {% endfor %}
         </div>
       {% endif %}
 
-      <section class="grid gap-8 rounded-lg bg-white p-8 shadow-sm md:grid-cols-[1.1fr,0.9fr]">
-        <div>
-          <h2 class="text-3xl font-semibold leading-tight">Turn consultation requests into paid bookings.</h2>
-          <p class="mt-4 text-slate-600">
-            Start with consultation-first lead capture now, then connect Payfast for one-time bookings and monthly retainers.
-            Every request records the package, preferred time, and notes so you can confirm your availability before payment.
-          </p>
+      <section class="overflow-hidden rounded-[2rem] border border-white/10 bg-white/6 shadow-2xl shadow-cyan-950/25 backdrop-blur-xl">
+        <div class="grid gap-0 md:grid-cols-[1.15fr,0.85fr]">
+          <div class="relative p-6 md:p-10" id="booking">
+            <div class="inline-flex items-center gap-2 rounded-full border border-cyan-300/20 bg-cyan-300/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.24em] text-cyan-100">
+              <span class="h-2 w-2 rounded-full bg-cyan-300"></span>
+              Monthly memberships only
+            </div>
+
+            <h2 class="mt-6 max-w-xl text-4xl font-semibold leading-[1.05] text-white md:text-6xl">
+              Choose a membership, create your account, then pay and manage your slots.
+            </h2>
+            <p class="mt-5 max-w-2xl text-base leading-7 text-slate-300 md:text-lg">
+              Start by selecting a product, then finish account creation and payment in one flow.
+              After payment, members land in the client dashboard to manage haircut dates and times.
+            </p>
+
+            <div class="mt-8 flex flex-wrap gap-3">
+              <a href="#plans" class="inline-flex items-center rounded-full bg-cyan-400 px-5 py-3 text-sm font-semibold text-slate-950 hover:bg-cyan-300">
+                Select a plan
+              </a>
+              <a href="https://wa.me/27818082570" target="_blank" rel="noopener noreferrer" class="inline-flex items-center rounded-full border border-white/15 px-5 py-3 text-sm font-semibold text-white hover:border-cyan-300/50 hover:bg-white/5">
+                Book on WhatsApp
+              </a>
+            </div>
+
+            <div class="mt-10 grid gap-4 sm:grid-cols-3">
+              <div class="rounded-2xl border border-white/10 bg-white/5 p-4">
+                <p class="text-xs uppercase tracking-[0.24em] text-slate-400">Haircut</p>
+                <p class="mt-2 text-2xl font-semibold text-white">R100</p>
+                <p class="mt-1 text-sm text-slate-300">Monthly membership.</p>
+              </div>
+              <div class="rounded-2xl border border-white/10 bg-white/5 p-4">
+                <p class="text-xs uppercase tracking-[0.24em] text-slate-400">2x Haircuts</p>
+                <p class="mt-2 text-2xl font-semibold text-white">R200</p>
+                <p class="mt-1 text-sm text-slate-300">Two cuts per month.</p>
+              </div>
+              <div class="rounded-2xl border border-white/10 bg-white/5 p-4">
+                <p class="text-xs uppercase tracking-[0.24em] text-slate-400">Combined</p>
+                <p class="mt-2 text-2xl font-semibold text-white">R350</p>
+                <p class="mt-1 text-sm text-slate-300">Haircut + consultation.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="border-t border-white/10 bg-[#0b1729]/80 p-6 md:border-l md:border-t-0 md:p-8">
+            <div class="rounded-[1.5rem] border border-white/10 bg-[#0f1d33] p-5 shadow-xl shadow-black/20">
+              <h3 class="text-lg font-semibold text-white">How the flow works</h3>
+              <div class="mt-4 space-y-3 text-sm text-slate-300">
+                <div class="rounded-2xl border border-white/10 bg-white/5 p-4">
+                  <p class="font-semibold text-white">1. Select a product</p>
+                  <p class="mt-1">Choose the membership that matches how often you want to come in.</p>
+                </div>
+                <div class="rounded-2xl border border-white/10 bg-white/5 p-4">
+                  <p class="font-semibold text-white">2. Create your account</p>
+                  <p class="mt-1">Add your details once so the dashboard belongs to you.</p>
+                </div>
+                <div class="rounded-2xl border border-white/10 bg-white/5 p-4">
+                  <p class="font-semibold text-white">3. Pay and manage bookings</p>
+                  <p class="mt-1">After payment, you land in your client dashboard to manage haircut dates and times.</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="mt-5 grid gap-4 md:grid-cols-2">
+              <div class="rounded-2xl border border-white/10 bg-white/5 p-4">
+                <h4 class="text-sm font-semibold text-white">Dashboard access</h4>
+                <p class="mt-1 text-sm text-slate-300">Members keep control of upcoming slots after activation.</p>
+              </div>
+              <div class="rounded-2xl border border-white/10 bg-white/5 p-4">
+                <h4 class="text-sm font-semibold text-white">Payment handoff</h4>
+                <p class="mt-1 text-sm text-slate-300">Payfast still handles the subscription step before the dashboard opens.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="mt-8 grid gap-4 md:grid-cols-2 lg:grid-cols-3" id="plans">
+        {% for card in pricing_cards %}
+          <div class="rounded-[1.5rem] border border-white/10 bg-white/6 p-5 backdrop-blur">
+            <div class="flex items-start justify-between gap-4">
+              <div>
+                <p class="text-xs uppercase tracking-[0.24em] text-cyan-200/70">Membership</p>
+                <h3 class="mt-2 text-lg font-semibold text-white">{{ card.title }}</h3>
+                <p class="mt-1 text-sm text-slate-300">{{ card.description }}</p>
+              </div>
+              <span class="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-medium text-slate-200">{{ card.billing }}</span>
+            </div>
+            <p class="mt-5 text-3xl font-semibold text-white">{{ card.price }}</p>
+            <p class="mt-2 text-sm text-slate-400">{{ card.includes_consultation|yesno:"Includes consultation support,Haircut only" }}</p>
+            <button
+              type="button"
+              class="mt-5 inline-flex w-full items-center justify-center rounded-full bg-cyan-400 px-4 py-3 text-sm font-semibold text-slate-950 hover:bg-cyan-300"
+              data-plan-code="{{ card.code }}"
+              data-plan-name="{{ card.title }}"
+              data-plan-price="{{ card.price }}"
+              onclick="openPlanModal(this)"
+            >
+              Select this plan
+            </button>
+          </div>
+        {% endfor %}
+      </section>
+
+      <div id="plan-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-950/80 px-4 py-8 backdrop-blur-sm">
+        <div class="w-full max-w-lg rounded-[2rem] border border-white/10 bg-[#0f1d33] p-6 shadow-2xl shadow-black/40">
+          <div class="flex items-start justify-between gap-4">
+            <div>
+              <p class="text-xs uppercase tracking-[0.24em] text-cyan-200/70">Selected plan</p>
+              <h3 id="plan-modal-title" class="mt-2 text-2xl font-semibold text-white">Plan</h3>
+              <p id="plan-modal-price" class="mt-1 text-sm text-slate-300"></p>
+            </div>
+            <button type="button" class="rounded-full border border-white/10 px-3 py-1 text-sm text-slate-300 hover:bg-white/5" onclick="closePlanModal()">
+              Close
+            </button>
+          </div>
+
+          <div class="mt-6 rounded-2xl border border-white/10 bg-white/5 p-4 text-sm text-slate-300">
+            You’ll create your account next, then pay to activate the membership and open your client dashboard.
+          </div>
 
           <div class="mt-6 flex flex-wrap gap-3">
-            <a
-              href="https://wa.me/27818082570"
-              target="_blank"
-              rel="noopener noreferrer"
-              "description": "A consultation booking that includes a haircut.",
-            >
-              Chat on WhatsApp
+            <a id="plan-modal-continue" href="#" class="inline-flex flex-1 items-center justify-center rounded-full bg-cyan-400 px-5 py-3 text-sm font-semibold text-slate-950 hover:bg-cyan-300">
+              Continue to account creation
             </a>
-            <a
-              href="{% url 'accounts:signup' %}"
-              class="inline-flex items-center rounded border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-800 hover:bg-slate-50"
-            >
-              Create an account
-            </a>
-          </div>
-
-          <div class="mt-6 grid gap-4 sm:grid-cols-2">
-            <div class="rounded border border-slate-200 bg-slate-50 p-4">
-              <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Base haircut</p>
-              <p class="mt-2 text-2xl font-semibold">R100</p>
-              <p class="mt-1 text-sm text-slate-600">The base haircut fee for one-off or subscription paths.</p>
-            </div>
-            <div class="rounded border border-slate-200 bg-slate-50 p-4">
-              <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Consultation</p>
-              <p class="mt-2 text-2xl font-semibold">R250/hour</p>
-              <p class="mt-1 text-sm text-slate-600">Use this for deeper consultation sessions or longer planning time.</p>
-            </div>
-          </div>
-        </div>
-
-        <div class="rounded-2xl border border-slate-200 bg-slate-50 p-5">
-          <h3 class="text-lg font-semibold">Request a consultation</h3>
-          <p class="mt-1 text-sm text-slate-600">Choose your package and we’ll use this as the lead-in to payment and scheduling.</p>
-
-          <form method="post" class="mt-5 space-y-4">
-            {% csrf_token %}
-            {% for field in form %}
-              <div>
-                <label class="block text-sm font-medium" for="{{ field.id_for_label }}">{{ field.label }}</label>
-                {{ field }}
-                {% if field.help_text %}
-                  <p class="mt-1 text-xs text-slate-500">{{ field.help_text }}</p>
-                {% endif %}
-                {% if field.errors %}
-                  <p class="mt-1 text-xs text-rose-600">{{ field.errors|striptags }}</p>
-                {% endif %}
-              </div>
-            {% endfor %}
-
-            <button
-              type="submit"
-              class="w-full rounded bg-slate-900 px-4 py-3 text-sm font-semibold text-white hover:bg-slate-800"
-            >
-              Send consultation request
+            <button type="button" class="inline-flex items-center justify-center rounded-full border border-white/15 px-5 py-3 text-sm font-semibold text-white hover:bg-white/5" onclick="closePlanModal()">
+              Not now
             </button>
-          </form>
+          </div>
         </div>
-      </section>
+      </div>
 
-      <section class="mt-8">
-        <div class="grid gap-4 md:grid-cols-2">
-          {% for card in pricing_cards %}
-            <div class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
-              <div class="flex items-start justify-between gap-4">
-                <div>
-                  <h3 class="text-base font-semibold">{{ card.title }}</h3>
-                  <p class="mt-1 text-sm text-slate-600">{{ card.description }}</p>
-                </div>
-                <span class="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-600">{{ card.billing }}</span>
-              </div>
-              <p class="mt-4 text-2xl font-semibold">{{ card.price }}</p>
-            </div>
-          {% endfor %}
-        </div>
-      </section>
-
-      <section class="mt-8 rounded-lg bg-white p-6 shadow-sm">
+      <section class="mt-8 rounded-[2rem] border border-white/10 bg-white/6 p-6 backdrop-blur">
         <div class="grid gap-6 md:grid-cols-3">
           <div>
-            <h3 class="text-sm font-semibold">Consultation-first capture</h3>
-            <p class="mt-1 text-sm text-slate-600">
-              Collect the request, preferred date, and notes before sending a payment link.
-            </p>
+            <h3 class="text-sm font-semibold text-white">Subscription-first capture</h3>
+            <p class="mt-1 text-sm text-slate-300">Collect the request, preferred date, and notes before sending a payment link.</p>
           </div>
           <div>
-            <h3 class="text-sm font-semibold">Payfast-ready pricing</h3>
-            <p class="mt-1 text-sm text-slate-600">
-              The form is aligned to one-time bookings and monthly retainers for easy checkout wiring later.
-            </p>
+            <h3 class="text-sm font-semibold text-white">Booking endpoint ready</h3>
+            <p class="mt-1 text-sm text-slate-300">Your Meta flow can post into a website endpoint and create a booking request instantly.</p>
           </div>
           <div>
-            <h3 class="text-sm font-semibold">Availability-based scheduling</h3>
-            <p class="mt-1 text-sm text-slate-600">
-              Once payment is confirmed, the next step is to let clients pick a slot based on your availability.
-            </p>
+            <h3 class="text-sm font-semibold text-white">Availability-based scheduling</h3>
+            <p class="mt-1 text-sm text-slate-300">Once payment is confirmed, clients can be shown only the slots you allow.</p>
           </div>
         </div>
       </section>
     </main>
 
-    <footer class="border-t bg-white py-6">
-      <div class="mx-auto max-w-4xl px-4 text-sm text-slate-500">
+    <script>
+      const planModal = document.getElementById('plan-modal');
+      const planTitle = document.getElementById('plan-modal-title');
+      const planPrice = document.getElementById('plan-modal-price');
+      const planContinue = document.getElementById('plan-modal-continue');
+
+      function openPlanModal(button) {
+        const planCode = button.getAttribute('data-plan-code');
+        const planName = button.getAttribute('data-plan-name');
+        const planPriceText = button.getAttribute('data-plan-price');
+        planTitle.textContent = planName;
+        planPrice.textContent = planPriceText;
+        planContinue.href = `{% url 'accounts:signup' %}?plan=${planCode}`;
+        planModal.classList.remove('hidden');
+        planModal.classList.add('flex');
+      }
+
+      function closePlanModal() {
+        planModal.classList.add('hidden');
+        planModal.classList.remove('flex');
+      }
+
+      planModal.addEventListener('click', function (event) {
+        if (event.target === planModal) {
+          closePlanModal();
+        }
+      });
+    </script>
+
+    <footer class="border-t border-white/10 bg-[#07111f] py-6">
+      <div class="mx-auto max-w-6xl px-4 text-sm text-slate-400 md:px-6">
         &copy; Dissafyt • Built with Django
       </div>
     </footer>

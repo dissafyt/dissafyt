@@ -42,7 +42,10 @@ Then open: `http://localhost:8000`
 ## 🧱 Render Deployment (build + start)
 
 - **Build command:** `pip install -r requirements.txt`
+- **Release command:** `bash scripts/render_release.sh`
 - **Start command:** `gunicorn dissafyt_platform.wsgi --log-file -`
+
+The release command waits for Postgres to be reachable, runs `manage.py check`, and then applies migrations before the web process starts. This avoids running migrations during the build phase.
 
 ## 📚 Docs
 

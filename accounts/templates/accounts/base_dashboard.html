@@ -10,14 +10,12 @@
     <div class="flex min-h-screen">
       <!-- Sidebar -->
       <aside class="flex w-64 flex-col border-r bg-white">
-        <!-- Logo -->
         <div class="flex items-center border-b px-5 py-4">
           <div class="rounded bg-sky-600 px-2 py-1 text-sm font-semibold text-white">
             Dissafyt
           </div>
         </div>
 
-        <!-- Menu -->
         <nav class="flex-1 overflow-y-auto px-3 py-4">
           <ul class="space-y-1 text-sm">
             <li>
@@ -31,47 +29,20 @@
             </li>
             <li>
               <a
-                href="{% url 'cms:business_profile' %}"
+                href="#appointments"
                 class="flex items-center rounded px-3 py-2 hover:bg-slate-100"
               >
-                <span class="mr-2">🏢</span>
-                <span>Business profile</span>
+                <span class="mr-2">📅</span>
+                <span>Haircut slots</span>
               </a>
             </li>
             <li>
               <a
-                href="{% url 'cms:services' %}"
+                href="#membership"
                 class="flex items-center rounded px-3 py-2 hover:bg-slate-100"
               >
-                <span class="mr-2">🧰</span>
-                <span>Services</span>
-              </a>
-            </li>
-            <li>
-              <a
-                href="{% url 'cms:testimonials' %}"
-                class="flex items-center rounded px-3 py-2 hover:bg-slate-100"
-              >
-                <span class="mr-2">💬</span>
-                <span>Testimonials</span>
-              </a>
-            </li>
-            <li>
-              <a
-                href="{% url 'cms:gallery' %}"
-                class="flex items-center rounded px-3 py-2 hover:bg-slate-100"
-              >
-                <span class="mr-2">🖼️</span>
-                <span>Gallery</span>
-              </a>
-            </li>
-            <li>
-              <a
-                href="{% url 'websites:settings' %}"
-                class="flex items-center rounded px-3 py-2 hover:bg-slate-100"
-              >
-                <span class="mr-2">🌐</span>
-                <span>Website settings</span>
+                <span class="mr-2">💳</span>
+                <span>Membership</span>
               </a>
             </li>
           </ul>

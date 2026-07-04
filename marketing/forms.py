@@ -1,6 +1,6 @@
 from django import forms
 
-from .models import ConsultationInquiry, Lead
+from .models import ConsultationInquiry, Lead, Subscription, SubscriptionPlan
 
 
 class LeadForm(forms.ModelForm):
@@ -97,6 +97,76 @@ class ConsultationInquiryForm(forms.ModelForm):
                 }
             ),
         }
+
+    def clean_email(self):
+        email = self.cleaned_data.get("email")
+        if email and email.endswith("@example.com"):
+            raise forms.ValidationError("Please use a real email address.")
+        return email
+
+
+class SubscriptionForm(forms.ModelForm):
+    """Subscription signup form for monthly Payfast billing."""
+
+    class Meta:
+        model = Subscription
+        fields = [
+            "full_name",
+            "email",
+            "phone",
+            "plan",
+            "preferred_date",
+            "preferred_time",
+            "notes",
+        ]
+        widgets = {
+            "full_name": forms.TextInput(
+                attrs={
+                    "class": "mt-1 block w-full rounded border border-slate-200 px-3 py-2",
+                    "placeholder": "Your full name",
+                }
+            ),
+            "email": forms.EmailInput(
+                attrs={
+                    "class": "mt-1 block w-full rounded border border-slate-200 px-3 py-2",
+                    "placeholder": "you@example.com",
+                }
+            ),
+            "phone": forms.TextInput(
+                attrs={
+                    "class": "mt-1 block w-full rounded border border-slate-200 px-3 py-2",
+                    "placeholder": "+27 82 000 0000",
+                }
+            ),
+            "plan": forms.Select(
+                attrs={
+                    "class": "mt-1 block w-full rounded border border-slate-200 px-3 py-2",
+                }
+            ),
+            "preferred_date": forms.DateInput(
+                attrs={
+                    "class": "mt-1 block w-full rounded border border-slate-200 px-3 py-2",
+                    "type": "date",
+                }
+            ),
+            "preferred_time": forms.TextInput(
+                attrs={
+                    "class": "mt-1 block w-full rounded border border-slate-200 px-3 py-2",
+                    "placeholder": "Morning, afternoon, or a specific time",
+                }
+            ),
+            "notes": forms.Textarea(
+                attrs={
+                    "class": "mt-1 block w-full rounded border border-slate-200 px-3 py-2",
+                    "rows": 4,
+                    "placeholder": "Tell us what you need and when you would like to start.",
+                }
+            ),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["plan"].queryset = SubscriptionPlan.objects.filter(active=True)
 
     def clean_email(self):
         email = self.cleaned_data.get("email")
