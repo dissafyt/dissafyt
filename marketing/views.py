@@ -8,20 +8,50 @@ from django.urls import reverse
 from django.views.decorators.http import require_POST
 from django.contrib import messages
 
-from .forms import LeadForm
+from .forms import ConsultationInquiryForm, LeadForm
 from .utils import build_whatsapp_link, generate_human_summary, generate_llm_response
 
 
 def home_view(request):
-    """Render the marketing homepage and accept new leads."""
+    """Render the marketing homepage and accept consultation-first enquiries."""
 
-    form = LeadForm(request.POST or None)
+    form = ConsultationInquiryForm(request.POST or None)
     if request.method == "POST" and form.is_valid():
-        form.save()
-        messages.success(request, "Thanks! We'll be in touch soon.")
+        inquiry = form.save()
+        messages.success(
+            request,
+            f"Thanks! We received your {inquiry.get_package_display().lower()} request and quoted R{inquiry.estimated_amount:.2f}.",
+        )
         return redirect(reverse("marketing:home"))
 
-    return render(request, "marketing/home.html", {"form": form})
+    pricing_cards = [
+        {
+            "title": "Consultation booking",
+            "price": f"R{settings.CONSULTATION_BOOKING_FEE:.2f}",
+            "billing": "One-time",
+            "description": "A consultation booking that includes the haircut discussion and next steps.",
+        },
+        {
+            "title": "Hourly consultation",
+            "price": f"R{settings.HOURLY_CONSULTATION_RATE:.2f}/hour",
+            "billing": "One-time",
+            "description": "Best when the consultation needs a longer working session.",
+        },
+        {
+            "title": "Haircut retainer",
+            "price": f"R{settings.HAIRCUT_MONTHLY_RETAINER:.2f}/month",
+            "billing": "Subscription",
+            "description": "A simple monthly haircut retainer for repeat clients.",
+        },
+        {
+            "title": "Haircut + consultation retainer",
+            "price": f"R{settings.FULL_RETAINER_MONTHLY:.2f}/month",
+            "billing": "Subscription",
+            "description": "The full monthly option for both haircut and consultation access.",
+        },
+    ]
+
+    return render(request, "marketing/home.html", {"form": form, "pricing_cards": pricing_cards})
 
 
 @require_POST

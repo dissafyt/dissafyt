@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
 import os
+from decimal import Decimal
 from pathlib import Path
 import dj_database_url
 
@@ -160,6 +161,21 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # Optional human handoff configuration (used by the marketing LLM API)
 HUMAN_WHATSAPP_NUMBER = os.environ.get("HUMAN_WHATSAPP_NUMBER", "")
+
+# Consultation-first pricing scaffold.
+CONSULTATION_BOOKING_FEE = Decimal(os.environ.get("CONSULTATION_BOOKING_FEE", "100.00"))
+HOURLY_CONSULTATION_RATE = Decimal(os.environ.get("HOURLY_CONSULTATION_RATE", "250.00"))
+HAIRCUT_MONTHLY_RETAINER = Decimal(os.environ.get("HAIRCUT_MONTHLY_RETAINER", "100.00"))
+FULL_RETAINER_MONTHLY = Decimal(os.environ.get("FULL_RETAINER_MONTHLY", "350.00"))
+
+# Payfast settings for future checkout/subscription integration.
+PAYFAST_MERCHANT_ID = os.environ.get("PAYFAST_MERCHANT_ID", "")
+PAYFAST_MERCHANT_KEY = os.environ.get("PAYFAST_MERCHANT_KEY", "")
+PAYFAST_PASSPHRASE = os.environ.get("PAYFAST_PASSPHRASE", "")
+PAYFAST_RETURN_URL = os.environ.get("PAYFAST_RETURN_URL", "")
+PAYFAST_CANCEL_URL = os.environ.get("PAYFAST_CANCEL_URL", "")
+PAYFAST_NOTIFY_URL = os.environ.get("PAYFAST_NOTIFY_URL", "")
+PAYFAST_ENVIRONMENT = os.environ.get("PAYFAST_ENVIRONMENT", "sandbox")
 
 GCP_SERVICE_ACCOUNT_FILENAME = "dissafyt-fbc95c37d13d.json"
 _render_secret_path = Path("/etc/secrets") / GCP_SERVICE_ACCOUNT_FILENAME
