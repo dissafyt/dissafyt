@@ -41,11 +41,14 @@ Then open: `http://localhost:8000`
 
 ## 🧱 Render Deployment (build + start)
 
-- **Build command:** `pip install -r requirements.txt`
+- **Build command:** `bash build.sh`
 - **Release command:** `bash scripts/render_release.sh`
-- **Start command:** `gunicorn dissafyt_platform.wsgi --log-file -`
+- **Start command:** `gunicorn dissafyt_platform.wsgi:application --log-file -`
+- **Python version:** `python-3.12.3` via [runtime.txt](/workspaces/dissafyt/runtime.txt)
 
-The release command waits for Postgres to be reachable, runs `manage.py check`, and then applies migrations before the web process starts. This avoids running migrations during the build phase.
+The build script installs dependencies and collects static files only. The release command waits for Postgres to be reachable, runs `manage.py check`, and then applies migrations before the web process starts. This avoids running migrations during the build phase.
+
+If the Render dashboard has a manual build command override, it must not include `manage.py migrate`. The dashboard should use build-only installation, release-time migrations, and Gunicorn at start.
 
 ## 📚 Docs
 

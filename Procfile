@@ -1,1 +1,1 @@
-web: gunicorn dissafyt_platform.wsgi --log-file -
+web: gunicorn dissafyt_platform.wsgi:application --log-file -
