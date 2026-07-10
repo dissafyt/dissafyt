@@ -42,7 +42,7 @@ DEBUG = _env_bool("DEBUG", default=False)
 
 ALLOWED_HOSTS = _env_list(
     "ALLOWED_HOSTS",
-    default="localhost,127.0.0.1,.onrender.com",
+    default="localhost,127.0.0.1,dissafyt.onrender.com",
 )
 
 
