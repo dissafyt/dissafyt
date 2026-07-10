@@ -5,7 +5,7 @@ services:
     plan: starter
     buildCommand: bash build.sh
     releaseCommand: bash scripts/render_release.sh
-    startCommand: gunicorn dissafyt_platform.wsgi:application --log-file -
+    startCommand: gunicorn dissafyt_platform.wsgi:application --bind 0.0.0.0:$PORT --log-file -
     envVars:
       - key: DJANGO_SETTINGS_MODULE
         value: dissafyt_platform.settings

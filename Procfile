@@ -1,1 +1,1 @@
-web: gunicorn dissafyt_platform.wsgi:application --log-file -
+web: gunicorn dissafyt_platform.wsgi:application --bind 0.0.0.0:$PORT --log-file -
