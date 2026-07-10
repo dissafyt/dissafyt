@@ -42,7 +42,8 @@ DEBUG = _env_bool("DEBUG", default=False)
 
 ALLOWED_HOSTS = _env_list(
     "ALLOWED_HOSTS",
-    default="localhost,127.0.0.1,dissafyt.onrender.com",
+    default="localhost,127.0.0.1," \
+    "https://dissafyt.onrender.com",
 )
 
 
