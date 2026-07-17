@@ -13,9 +13,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 import os
 from decimal import Decimal
 from pathlib import Path
-from urllib.parse import urlparse
-
-import dj_database_url
+from urllib.parse import parse_qsl, urlparse
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -118,12 +116,18 @@ DATABASES = {
 }
 
 # On Render, use DATABASE_URL to switch to Postgres
-if os.environ.get("DATABASE_URL"):
-    DATABASES["default"] = dj_database_url.parse(
-        os.environ["DATABASE_URL"],
-        conn_max_age=600,
-        ssl_require=True,
-    )
+_database_url = os.environ.get("DATABASE_URL")
+if _database_url:
+    _tmp_postgres = urlparse(_database_url)
+    DATABASES["default"] = {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": _tmp_postgres.path.replace("/", ""),
+        "USER": _tmp_postgres.username,
+        "PASSWORD": _tmp_postgres.password,
+        "HOST": _tmp_postgres.hostname,
+        "PORT": _tmp_postgres.port or 5432,
+        "OPTIONS": dict(parse_qsl(_tmp_postgres.query)),
+    }
 
 
 # Password validation
