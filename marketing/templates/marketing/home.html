@@ -151,12 +151,12 @@
           </div>
 
           <div class="mt-6 rounded-2xl border border-white/10 bg-white/5 p-4 text-sm text-slate-300">
-            You’ll create your account next, then pay to activate the membership and open your client dashboard.
+            Select your service first, then sign in or create your account before checkout creates the payment record.
           </div>
 
           <div class="mt-6 flex flex-wrap gap-3">
             <a id="plan-modal-continue" href="#" class="inline-flex flex-1 items-center justify-center rounded-full bg-cyan-400 px-5 py-3 text-sm font-semibold text-slate-950 hover:bg-cyan-300">
-              Continue to account creation
+              Continue
             </a>
             <button type="button" class="inline-flex items-center justify-center rounded-full border border-white/15 px-5 py-3 text-sm font-semibold text-white hover:bg-white/5" onclick="closePlanModal()">
               Not now
@@ -195,7 +195,7 @@
         const planPriceText = button.getAttribute('data-plan-price');
         planTitle.textContent = planName;
         planPrice.textContent = planPriceText;
-        planContinue.href = `{% url 'accounts:signup' %}?plan=${planCode}`;
+        planContinue.href = `{% url 'marketing:subscription_checkout_start' %}?plan=${planCode}`;
         planModal.classList.remove('hidden');
         planModal.classList.add('flex');
       }

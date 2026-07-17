@@ -9,6 +9,7 @@ class SubscriptionOnboardingForm(UserCreationForm):
     """Create a client account before sending them to payment."""
 
     plan_code = forms.CharField(required=False, widget=forms.HiddenInput())
+    next = forms.CharField(required=False, widget=forms.HiddenInput())
 
     full_name = forms.CharField(
         max_length=120,

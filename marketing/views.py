@@ -4,6 +4,7 @@ from datetime import datetime
 from decimal import Decimal
 
 from django.conf import settings
+from django.contrib.auth.views import redirect_to_login
 from django.http import HttpResponseBadRequest, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
@@ -149,6 +150,78 @@ def checkout_view(request, subscription_id):
             "payfast_subscription_mode": settings.PAYFAST_SUBSCRIPTION_MODE,
         },
     )
+
+
+def _resolve_subscription_plan(plan_code: str):
+    if not plan_code:
+        return None
+    try:
+        return SubscriptionPlan.objects.filter(code=plan_code, active=True).first()
+    except DatabaseError:
+        return None
+
+
+def _build_subscription_contact_details(request):
+    pending_details = request.session.get("pending_subscription_details") or {}
+    full_name = (pending_details.get("full_name") or request.user.get_full_name() or request.user.get_username() or "").strip()
+    email = (pending_details.get("email") or getattr(request.user, "email", "") or "").strip()
+    phone = (pending_details.get("phone") or "").strip()
+
+    if not full_name:
+        full_name = request.user.get_username() or "Dissafyt Client"
+
+    return {
+        "full_name": full_name,
+        "email": email,
+        "phone": phone,
+    }
+
+
+def subscription_checkout_start_view(request):
+    """Gate the subscription purchase behind auth before creating the Payfast subscription record."""
+
+    plan_code = request.GET.get("plan") or request.session.get("subscription_plan_code")
+    selected_plan = _resolve_subscription_plan(plan_code)
+    if not selected_plan:
+        messages.error(request, "Please choose a membership plan before continuing.")
+        return redirect(reverse("marketing:home"))
+
+    request.session["subscription_plan_code"] = selected_plan.code
+
+    if not request.user.is_authenticated:
+        return redirect_to_login(request.get_full_path(), login_url=reverse("accounts:login"), redirect_field_name="next")
+
+    pending_subscription_id = request.session.get("pending_subscription_id")
+    subscription = None
+    if pending_subscription_id:
+        subscription = Subscription.objects.filter(
+            pk=pending_subscription_id,
+            user=request.user,
+            plan=selected_plan,
+        ).select_related("plan").first()
+
+    if not subscription:
+        subscription = (
+            Subscription.objects.filter(user=request.user, plan=selected_plan, status=Subscription.STATUS_PENDING_PAYMENT)
+            .select_related("plan")
+            .order_by("-created_at")
+            .first()
+        )
+
+    if not subscription:
+        contact_details = _build_subscription_contact_details(request)
+        subscription = Subscription.objects.create(
+            user=request.user,
+            full_name=contact_details["full_name"],
+            email=contact_details["email"],
+            phone=contact_details["phone"],
+            plan=selected_plan,
+            status=Subscription.STATUS_PENDING_PAYMENT,
+        )
+        request.session["pending_subscription_id"] = subscription.id
+        request.session.pop("pending_subscription_details", None)
+
+    return redirect(reverse("marketing:checkout", kwargs={"subscription_id": subscription.id}))
 
 
 def payment_return_view(request, subscription_id):

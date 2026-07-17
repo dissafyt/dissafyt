@@ -37,6 +37,9 @@
         {% for hidden in form.hidden_fields %}
           {{ hidden }}
         {% endfor %}
+        {% if next_url %}
+          <input type="hidden" name="next" value="{{ next_url }}" />
+        {% endif %}
 
         {% for field in form.visible_fields %}
           <div>

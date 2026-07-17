@@ -5,6 +5,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse
 from django.views.generic import FormView, TemplateView, View
+from django.utils.http import url_has_allowed_host_and_scheme
 
 import logging
 
@@ -27,6 +28,13 @@ def _get_selected_plan(request):
         return None
 
 
+def _get_safe_next_url(request):
+    next_url = request.POST.get("next") or request.GET.get("next")
+    if next_url and url_has_allowed_host_and_scheme(next_url, allowed_hosts={request.get_host()}):
+        return next_url
+    return None
+
+
 class SignUpView(FormView):
     template_name = "accounts/signup.html"
     form_class = SubscriptionOnboardingForm
@@ -36,6 +44,9 @@ class SignUpView(FormView):
         selected_plan = _get_selected_plan(self.request)
         if selected_plan:
             initial["plan_code"] = selected_plan.code
+        next_url = _get_safe_next_url(self.request)
+        if next_url:
+            initial["next"] = next_url
         return initial
 
     def dispatch(self, request, *args, **kwargs):
@@ -47,6 +58,7 @@ class SignUpView(FormView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["selected_plan"] = _get_selected_plan(self.request)
+        context["next_url"] = _get_safe_next_url(self.request)
         return context
 
     def form_valid(self, form):
@@ -71,29 +83,38 @@ class SignUpView(FormView):
         user.save()
         login(self.request, user)
 
-        subscription = Subscription.objects.create(
-            user=user,
-            full_name=form.cleaned_data["full_name"],
-            email=form.cleaned_data["email"],
-            phone=form.cleaned_data["phone"],
-            plan=selected_plan,
-            status=Subscription.STATUS_PENDING_PAYMENT,
-        )
+        self.request.session["pending_subscription_details"] = {
+            "full_name": form.cleaned_data["full_name"],
+            "email": form.cleaned_data["email"],
+            "phone": form.cleaned_data["phone"],
+        }
+
+        next_url = _get_safe_next_url(self.request)
+        if next_url:
+            return redirect(next_url)
 
         messages.success(
             self.request,
-            f"Your {selected_plan.name.lower()} account is ready. Continue to payment to activate your membership.",
+            f"Your {selected_plan.name.lower()} account is ready. Continue to the checkout step to finish payment.",
         )
-        return redirect(reverse("marketing:checkout", kwargs={"subscription_id": subscription.id}))
+        return redirect(reverse("marketing:subscription_checkout_start"))
 
 
 class SignInView(FormView):
     template_name = "accounts/login.html"
     form_class = AuthenticationForm
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["next_url"] = _get_safe_next_url(self.request)
+        return context
+
     def form_valid(self, form):
         user = form.get_user()
         login(self.request, user)
+        next_url = _get_safe_next_url(self.request)
+        if next_url:
+            return redirect(next_url)
         return redirect(reverse("accounts:dashboard"))
 
 
