@@ -10,8 +10,9 @@ from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib import messages
 
-from .models import BookingRequest, Subscription, SubscriptionPlan
+from .models import BookingRequest, Subscription, SubscriptionPlan, Order, OrderLine, CourierShipment
 from .utils import build_whatsapp_link, generate_human_summary, generate_llm_response
+from . import courier_client
 
 
 def home_view(request):
@@ -121,6 +122,42 @@ def payment_notify_view(request):
         subscription = Subscription.objects.filter(pk=int(subscription_id)).select_related("plan").first()
 
     if not subscription:
+        # Try order flow: m_payment_id may be order-<id>
+        if isinstance(m_payment_id, str) and m_payment_id.startswith("order-"):
+            order_id = m_payment_id.replace("order-", "")
+            if order_id.isdigit():
+                order = Order.objects.filter(pk=int(order_id)).first()
+                if not order:
+                    return JsonResponse({"ok": False}, status=404)
+
+                order.raw_notify_payload = payload if hasattr(order, 'raw_notify_payload') else {}
+                payment_status = payload.get("payment_status", "").upper()
+                if payment_status == "COMPLETE":
+                    order.status = Order.STATUS_PAID
+                    order.save()
+
+                    # Create shipment if needed and courier enabled and shipping was delivery
+                    if getattr(settings, "COURIER_ENABLED", False) and order.shipping_amount >= 0 and order.shipping_quote:
+                        # Build basic shipment payload from order.shipping_quote
+                        ship_payload = {
+                            "quote": order.shipping_quote,
+                            "recipient": {"phone": order.phone, "email": order.email},
+                        }
+                        resp = courier_client.create_shipment(ship_payload)
+                        # Persist CourierShipment
+                        cs = CourierShipment.objects.create(
+                            order=order,
+                            external_id=str(resp.get("data", {}).get("id") or resp.get("data", {}).get("shipment_id") or ""),
+                            status=str(resp.get("status_code") or ""),
+                            service_level=str(order.shipping_quote.get("service_level", "")),
+                            quote_snapshot=resp.get("data") if resp.get("ok") else {"error": resp.get("error")},
+                        )
+                    return JsonResponse({"ok": True})
+                else:
+                    order.status = Order.STATUS_PENDING
+                    order.save()
+                    return JsonResponse({"ok": True})
+
         return JsonResponse({"ok": False}, status=404)
 
     subscription.raw_notify_payload = payload
@@ -258,3 +295,123 @@ def llm_chat(request):
             response["wa_url"] = build_whatsapp_link(wa_number, summary)
 
     return JsonResponse(response)
+
+
+
+@csrf_exempt
+@require_POST
+def rates_quote_view(request):
+    """API endpoint to request courier rate quotes (POST JSON payload forwarded to courier client)."""
+    try:
+        payload = json.loads(request.body.decode("utf-8"))
+    except json.JSONDecodeError:
+        return HttpResponseBadRequest("Invalid JSON")
+
+    result = courier_client.quote_rates(payload)
+    status = 200 if result.get("ok") else 502
+    return JsonResponse(result, status=status)
+
+
+@csrf_exempt
+@require_POST
+def create_shipment_view(request):
+    """API endpoint to create a shipment after checkout completes."""
+    try:
+        payload = json.loads(request.body.decode("utf-8"))
+    except json.JSONDecodeError:
+        return HttpResponseBadRequest("Invalid JSON")
+
+    result = courier_client.create_shipment(payload)
+    status = 201 if result.get("ok") else 502
+    return JsonResponse(result, status=status)
+
+
+def track_shipment_view(request, shipment_id: str):
+    """Track a shipment by external id."""
+    result = courier_client.track_shipment(shipment_id)
+    status = 200 if result.get("ok") else 502
+    return JsonResponse(result, status=status)
+
+
+def checkout_items_view(request):
+    """Render a simple tangible-item checkout page that lets users choose pickup or delivery."""
+    return render(request, "marketing/checkout_items.html", {})
+
+
+@csrf_exempt
+@require_POST
+def submit_item_checkout_view(request):
+    """Create an Order, snapshot shipping quote, and render Payfast form for item sales."""
+    # Expect form fields: email, phone, mode (pickup|delivery), cart_json, shipping_option (JSON)
+    email = request.POST.get("email", "").strip()
+    phone = request.POST.get("phone", "").strip()
+    mode = request.POST.get("mode", "pickup")
+    cart_json = request.POST.get("cart_json", "")
+    shipping_option = request.POST.get("shipping_option", "")
+
+    try:
+        cart = json.loads(cart_json) if cart_json else []
+    except Exception:
+        cart = []
+
+    try:
+        shipping_meta = json.loads(shipping_option) if shipping_option else {}
+    except Exception:
+        shipping_meta = {}
+
+    # Compute items total
+    items_total = 0
+    for item in cart:
+        qty = int(item.get("quantity", 1))
+        unit = float(item.get("unit_price", 0))
+        items_total += qty * unit
+
+    shipping_amount = float(shipping_meta.get("amount", 0)) if mode == "delivery" else 0.0
+    shipping_included = bool(shipping_meta.get("entitlement_applied", False))
+
+    order = Order.objects.create(
+        email=email,
+        phone=phone,
+        total_amount=Decimal(items_total + shipping_amount),
+        shipping_amount=Decimal(shipping_amount),
+        shipping_included=shipping_included,
+        shipping_quote=shipping_meta,
+        shipping_entitlement_snapshot=shipping_meta.get("entitlement_snapshot", {}),
+    )
+
+    # Create order lines
+    for item in cart:
+        qty = int(item.get("quantity", 1))
+        unit = Decimal(str(item.get("unit_price", "0")))
+        OrderLine.objects.create(
+            order=order,
+            product_code=item.get("product_code", "item"),
+            title=item.get("title", "Item"),
+            unit_price=unit,
+            quantity=qty,
+            line_total=unit * qty,
+        )
+
+    # Set m_payment_id and re-save
+    order.m_payment_id = f"order-{order.id}"
+    order.save()
+
+    # Build Payfast payload similar to subscription checkout but for an order
+    payfast_action_url = _get_payfast_action_url()
+    payfast_payload = {
+        "merchant_id": settings.PAYFAST_MERCHANT_ID,
+        "merchant_key": settings.PAYFAST_MERCHANT_KEY,
+        "return_url": settings.PAYFAST_RETURN_URL or reverse("marketing:payment_return", kwargs={"subscription_id": 0}),
+        "cancel_url": settings.PAYFAST_CANCEL_URL or reverse("marketing:payment_cancel", kwargs={"subscription_id": 0}),
+        "notify_url": settings.PAYFAST_NOTIFY_URL or reverse("marketing:payment_notify"),
+        "name_first": email.split("@")[0] if email else "",
+        "name_last": "",
+        "email_address": email,
+        "m_payment_id": order.m_payment_id,
+        "amount": f"{order.total_amount:.2f}",
+        "item_name": f"Order {order.id}",
+        "item_description": "Items purchase",
+        "currency": settings.PAYFAST_CURRENCY,
+    }
+
+    return render(request, "marketing/payfast_checkout.html", {"subscription": order, "payfast_action_url": payfast_action_url, "payfast_payload": payfast_payload, "payfast_subscription_mode": False})

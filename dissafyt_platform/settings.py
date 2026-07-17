@@ -13,6 +13,8 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 import os
 from decimal import Decimal
 from pathlib import Path
+from urllib.parse import urlparse
+
 import dj_database_url
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -31,6 +33,14 @@ def _env_list(name: str, default: str = "") -> list[str]:
     return [item.strip() for item in raw.split(",") if item.strip()]
 
 
+def _normalize_host(value: str) -> str:
+    value = value.strip()
+    if "://" in value:
+        parsed = urlparse(value)
+        return parsed.hostname or parsed.path
+    return value.split("/")[0]
+
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
@@ -40,11 +50,12 @@ SECRET_KEY = os.environ.get("SECRET_KEY", "dev-only-insecure-change-me")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = _env_bool("DEBUG", default=False)
 
-ALLOWED_HOSTS = _env_list(
-    "ALLOWED_HOSTS",
-    default="localhost,127.0.0.1," \
-    "https://dissafyt.onrender.com",
-)
+_default_allowed_hosts = ["localhost", "127.0.0.1", ".onrender.com"]
+_configured_allowed_hosts = [_normalize_host(host) for host in _env_list("ALLOWED_HOSTS")]
+ALLOWED_HOSTS = []
+for host in _default_allowed_hosts + _configured_allowed_hosts:
+    if host and host not in ALLOWED_HOSTS:
+        ALLOWED_HOSTS.append(host)
 
 
 # Application definition
@@ -180,6 +191,17 @@ PAYFAST_ENVIRONMENT = os.environ.get("PAYFAST_ENVIRONMENT", "sandbox")
 PAYFAST_CURRENCY = os.environ.get("PAYFAST_CURRENCY", "ZAR")
 PAYFAST_SUBSCRIPTION_MODE = _env_bool("PAYFAST_SUBSCRIPTION_MODE", default=True)
 BOOKING_WEBHOOK_SECRET = os.environ.get("BOOKING_WEBHOOK_SECRET", "")
+
+# Courier Guy configuration (sandbox-first)
+COURIER_ENV = os.environ.get("COURIER_ENV", "sandbox")  # 'sandbox' or 'live'
+COURIER_ENABLED = _env_bool("COURIER_ENABLED", default=False)
+COURIER_API_KEY = os.environ.get("COURIER_API_KEY", "")
+COURIER_SANDBOX_BASE_URL = os.environ.get("COURIER_SANDBOX_BASE_URL", "https://api.shiplogic.com")
+COURIER_LIVE_BASE_URL = os.environ.get("COURIER_LIVE_BASE_URL", "https://api.portal.thecourierguy.co.za")
+COURIER_TIMEOUT_SECONDS = int(os.environ.get("COURIER_TIMEOUT_SECONDS", "15"))
+
+_COURIER_BASE = COURIER_LIVE_BASE_URL if COURIER_ENV.strip().lower() == "live" else COURIER_SANDBOX_BASE_URL
+COURIER_BASE_URL = _COURIER_BASE.rstrip("/")
 
 GCP_SERVICE_ACCOUNT_FILENAME = "dissafyt-fbc95c37d13d.json"
 _render_secret_path = Path("/etc/secrets") / GCP_SERVICE_ACCOUNT_FILENAME

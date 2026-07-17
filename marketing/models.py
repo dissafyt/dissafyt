@@ -86,6 +86,9 @@ class SubscriptionPlan(models.Model):
     name = models.CharField(max_length=120)
     description = models.TextField(blank=True)
     monthly_amount = models.DecimalField(max_digits=8, decimal_places=2)
+    # Delivery entitlement: whether this plan includes free delivery for tangible checkouts
+    includes_free_delivery = models.BooleanField(default=False)
+    free_deliveries_per_month = models.PositiveSmallIntegerField(default=0)
     includes_consultation = models.BooleanField(default=False)
     active = models.BooleanField(default=True)
     sort_order = models.PositiveSmallIntegerField(default=0)
@@ -192,6 +195,74 @@ class HaircutAppointment(models.Model):
 
     def __str__(self) -> str:
         return f"{self.user.get_username()} - {self.scheduled_date} {self.scheduled_time}"
+
+
+class CourierShipment(models.Model):
+    """Persist courier shipment/quote information for audit and tracking."""
+
+    order = models.ForeignKey(
+        "Order",
+        on_delete=models.SET_NULL,
+        related_name="shipments",
+        blank=True,
+        null=True,
+    )
+    external_id = models.CharField(max_length=255, blank=True, help_text="ID from courier provider")
+    status = models.CharField(max_length=64, blank=True)
+    service_level = models.CharField(max_length=80, blank=True)
+    quote_snapshot = models.JSONField(default=dict, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self) -> str:
+        return f"Shipment {self.external_id or self.pk} - {self.status}"
+
+
+class Order(models.Model):
+    """Minimal order model for tangible-product checkouts."""
+
+    STATUS_PENDING = "pending"
+    STATUS_PAID = "paid"
+    STATUS_CANCELLED = "cancelled"
+    STATUS_CHOICES = [
+        (STATUS_PENDING, "Pending Payment"),
+        (STATUS_PAID, "Paid"),
+        (STATUS_CANCELLED, "Cancelled"),
+    ]
+
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, blank=True, null=True)
+    email = models.EmailField(blank=True)
+    phone = models.CharField(max_length=50, blank=True)
+    total_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    shipping_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    shipping_included = models.BooleanField(default=False)
+    shipping_quote = models.JSONField(default=dict, blank=True)
+    shipping_entitlement_snapshot = models.JSONField(default=dict, blank=True)
+    status = models.CharField(max_length=24, choices=STATUS_CHOICES, default=STATUS_PENDING)
+    m_payment_id = models.CharField(max_length=120, blank=True, unique=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self) -> str:
+        return f"Order {self.pk} - {self.status} - {self.total_amount}"
+
+
+class OrderLine(models.Model):
+    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name="lines")
+    product_code = models.CharField(max_length=120)
+    title = models.CharField(max_length=255)
+    unit_price = models.DecimalField(max_digits=10, decimal_places=2)
+    quantity = models.PositiveIntegerField(default=1)
+    line_total = models.DecimalField(max_digits=10, decimal_places=2)
+
+    def __str__(self) -> str:
+        return f"{self.product_code} x{self.quantity} ({self.line_total})"
 
 
 class BookingRequest(models.Model):
