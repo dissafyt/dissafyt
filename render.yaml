@@ -9,3 +9,5 @@ services:
     envVars:
       - key: DJANGO_SETTINGS_MODULE
         value: dissafyt_platform.settings
+      - key: AUTO_APPLY_MIGRATIONS
+        value: "true"
