@@ -6,6 +6,10 @@ from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse
 from django.views.generic import FormView, TemplateView, View
 
+import logging
+
+from django.db import DatabaseError
+
 from marketing.models import HaircutAppointment, Subscription, SubscriptionPlan
 
 from .forms import HaircutAppointmentForm, SubscriptionOnboardingForm
@@ -15,7 +19,12 @@ def _get_selected_plan(request):
     plan_code = request.GET.get("plan") or request.POST.get("plan_code") or request.session.get("subscription_plan_code")
     if not plan_code:
         return None
-    return SubscriptionPlan.objects.filter(code=plan_code, active=True).first()
+    logger = logging.getLogger(__name__)
+    try:
+        return SubscriptionPlan.objects.filter(code=plan_code, active=True).first()
+    except DatabaseError:
+        logger.exception("Database error fetching SubscriptionPlan in _get_selected_plan")
+        return None
 
 
 class SignUpView(FormView):
