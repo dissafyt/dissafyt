@@ -31,6 +31,13 @@ class SignUpView(FormView):
     template_name = "accounts/signup.html"
     form_class = SubscriptionOnboardingForm
 
+    def get_initial(self):
+        initial = super().get_initial()
+        selected_plan = _get_selected_plan(self.request)
+        if selected_plan:
+            initial["plan_code"] = selected_plan.code
+        return initial
+
     def dispatch(self, request, *args, **kwargs):
         selected_plan = _get_selected_plan(request)
         if selected_plan:
@@ -45,9 +52,9 @@ class SignUpView(FormView):
     def form_valid(self, form):
         logger = logging.getLogger(__name__)
         selected_plan = _get_selected_plan(self.request)
-        # If the plan wasn't resolved (session or DB hiccup), try falling back to POST/session plan_code
+        # If the plan wasn't resolved, prefer the posted hidden field and then session storage.
         if not selected_plan:
-            plan_code = (self.request.POST.get("plan_code") or self.request.session.get("subscription_plan_code"))
+            plan_code = form.cleaned_data.get("plan_code") or self.request.session.get("subscription_plan_code")
             if plan_code:
                 try:
                     selected_plan = SubscriptionPlan.objects.filter(code=plan_code, active=True).first()
