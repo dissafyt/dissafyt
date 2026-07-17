@@ -6,6 +6,7 @@ from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse
 from django.views.generic import FormView, TemplateView, View
 from django.utils.http import url_has_allowed_host_and_scheme
+from urllib.parse import parse_qs, urlparse
 
 import logging
 
@@ -18,6 +19,11 @@ from .forms import HaircutAppointmentForm, SubscriptionOnboardingForm
 
 def _get_selected_plan(request):
     plan_code = request.GET.get("plan") or request.POST.get("plan_code") or request.session.get("subscription_plan_code")
+    if not plan_code:
+        next_url = request.GET.get("next") or request.POST.get("next") or request.session.get("pending_next_url")
+        if next_url:
+            parsed_next = urlparse(next_url)
+            plan_code = parse_qs(parsed_next.query).get("plan", [None])[0]
     if not plan_code:
         return None
     logger = logging.getLogger(__name__)
@@ -53,6 +59,9 @@ class SignUpView(FormView):
         selected_plan = _get_selected_plan(request)
         if selected_plan:
             request.session["subscription_plan_code"] = selected_plan.code
+        next_url = _get_safe_next_url(request)
+        if next_url:
+            request.session["pending_next_url"] = next_url
         return super().dispatch(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
@@ -91,6 +100,7 @@ class SignUpView(FormView):
 
         next_url = _get_safe_next_url(self.request)
         if next_url:
+            self.request.session["pending_next_url"] = next_url
             return redirect(next_url)
 
         messages.success(
