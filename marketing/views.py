@@ -11,6 +11,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.contrib import messages
 
 from .models import BookingRequest, Subscription, SubscriptionPlan, Order, OrderLine, CourierShipment
+from django.db import DatabaseError
 from .utils import build_whatsapp_link, generate_human_summary, generate_llm_response
 from . import courier_client
 
@@ -18,7 +19,15 @@ from . import courier_client
 def home_view(request):
     """Render the marketing homepage with plan selection entry points."""
 
-    plans = list(SubscriptionPlan.objects.filter(active=True).order_by("sort_order", "name"))
+    try:
+        plans = list(SubscriptionPlan.objects.filter(active=True).order_by("sort_order", "name"))
+    except DatabaseError as exc:
+        # If migrations haven't been applied in the environment yet, return fallback pricing cards
+        # and log the exception so the deploy/release process can be fixed without causing 500 errors.
+        import logging
+
+        logging.getLogger(__name__).exception("Failed to load SubscriptionPlan list (DB schema may be outdated): %s", exc)
+        plans = []
 
     pricing_cards = [
         {
