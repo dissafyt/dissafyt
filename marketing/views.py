@@ -1,6 +1,7 @@
 import json
 import os
 from datetime import datetime
+from decimal import Decimal
 
 from django.conf import settings
 from django.http import HttpResponseBadRequest, JsonResponse
@@ -14,6 +15,48 @@ from .models import BookingRequest, Subscription, SubscriptionPlan, Order, Order
 from django.db import DatabaseError
 from .utils import build_whatsapp_link, generate_human_summary, generate_llm_response
 from . import courier_client
+
+
+MERCH_CATALOG = [
+    {
+        "product_code": "tshirt_black_embroidered",
+        "title": "Black T-Shirt",
+        "description": "Black Dissafyt embroidered tee for everyday wear.",
+        "unit_price": Decimal("220.00"),
+    },
+    {
+        "product_code": "hoodie_black_embroidered",
+        "title": "Black Hoodie",
+        "description": "Heavyweight black hoodie with Dissafyt embroidery.",
+        "unit_price": Decimal("480.00"),
+    },
+    {
+        "product_code": "crewneck_black_embroidered",
+        "title": "Black Crewneck",
+        "description": "Clean black crewneck with embroidered Dissafyt branding.",
+        "unit_price": Decimal("430.00"),
+    },
+    {
+        "product_code": "trackpants_black_embroidered",
+        "title": "Black Track Pants",
+        "description": "Comfort-fit black track pants with embroidered detail.",
+        "unit_price": Decimal("360.00"),
+    },
+    {
+        "product_code": "hoodie_trackpants_combo",
+        "title": "Hoodie + Track Pants Combo",
+        "description": "Bundle: black hoodie plus black track pants.",
+        "unit_price": Decimal("790.00"),
+    },
+    {
+        "product_code": "crewneck_trackpants_combo",
+        "title": "Crewneck + Track Pants Combo",
+        "description": "Bundle: black crewneck plus black track pants.",
+        "unit_price": Decimal("730.00"),
+    },
+]
+
+MERCH_CATALOG_BY_CODE = {item["product_code"]: item for item in MERCH_CATALOG}
 
 
 def home_view(request):
@@ -344,7 +387,13 @@ def track_shipment_view(request, shipment_id: str):
 
 def checkout_items_view(request):
     """Render a simple tangible-item checkout page that lets users choose pickup or delivery."""
-    return render(request, "marketing/checkout_items.html", {})
+    return render(
+        request,
+        "marketing/checkout_items.html",
+        {
+            "merch_catalog": MERCH_CATALOG,
+        },
+    )
 
 
 @csrf_exempt
@@ -368,28 +417,46 @@ def submit_item_checkout_view(request):
     except Exception:
         shipping_meta = {}
 
-    # Compute items total
-    items_total = 0
+    normalized_cart = []
+    items_total = Decimal("0.00")
     for item in cart:
-        qty = int(item.get("quantity", 1))
-        unit = float(item.get("unit_price", 0))
-        items_total += qty * unit
+        product_code = str(item.get("product_code", "")).strip()
+        catalog_item = MERCH_CATALOG_BY_CODE.get(product_code)
+        if not catalog_item:
+            continue
 
-    shipping_amount = float(shipping_meta.get("amount", 0)) if mode == "delivery" else 0.0
+        qty = max(int(item.get("quantity", 1) or 1), 1)
+        unit = catalog_item["unit_price"]
+        line_total = unit * qty
+        items_total += line_total
+        normalized_cart.append(
+            {
+                "product_code": catalog_item["product_code"],
+                "title": catalog_item["title"],
+                "unit_price": str(unit),
+                "quantity": qty,
+                "line_total": str(line_total),
+            }
+        )
+
+    shipping_amount = Decimal(str(shipping_meta.get("amount", 0) or 0)) if mode == "delivery" else Decimal("0.00")
     shipping_included = bool(shipping_meta.get("entitlement_applied", False))
 
     order = Order.objects.create(
         email=email,
         phone=phone,
-        total_amount=Decimal(items_total + shipping_amount),
-        shipping_amount=Decimal(shipping_amount),
+        total_amount=items_total + shipping_amount,
+        shipping_amount=shipping_amount,
         shipping_included=shipping_included,
-        shipping_quote=shipping_meta,
+        shipping_quote={
+            **shipping_meta,
+            "selected_items": normalized_cart,
+        },
         shipping_entitlement_snapshot=shipping_meta.get("entitlement_snapshot", {}),
     )
 
     # Create order lines
-    for item in cart:
+    for item in normalized_cart:
         qty = int(item.get("quantity", 1))
         unit = Decimal(str(item.get("unit_price", "0")))
         OrderLine.objects.create(
@@ -398,7 +465,7 @@ def submit_item_checkout_view(request):
             title=item.get("title", "Item"),
             unit_price=unit,
             quantity=qty,
-            line_total=unit * qty,
+            line_total=Decimal(str(item.get("line_total", "0"))),
         )
 
     # Set m_payment_id and re-save

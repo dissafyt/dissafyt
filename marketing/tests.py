@@ -1,3 +1,41 @@
+from decimal import Decimal
+
+from django.test import TestCase
+from django.urls import reverse
+
+from .models import Order, OrderLine
+
+
+class MerchCheckoutTests(TestCase):
+    def test_checkout_page_lists_merch_catalog(self):
+        response = self.client.get(reverse("marketing:checkout_items"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Black T-Shirt")
+        self.assertContains(response, "Black Hoodie")
+        self.assertContains(response, "Hoodie + Track Pants Combo")
+
+    def test_submit_item_checkout_uses_catalog_pricing(self):
+        payload = {
+            "email": "merch@example.net",
+            "phone": "+27820000000",
+            "mode": "pickup",
+            "cart_json": (
+                '[{"product_code":"hoodie_black_embroidered","quantity":1},'
+                '{"product_code":"trackpants_black_embroidered","quantity":1},'
+                '{"product_code":"unknown_product","quantity":3}]'
+            ),
+            "shipping_option": "{}",
+        }
+
+        response = self.client.post(reverse("marketing:checkout_items_submit"), payload)
+
+        self.assertEqual(response.status_code, 200)
+        order = Order.objects.get(email="merch@example.net")
+        self.assertEqual(order.total_amount, Decimal("840.00"))
+        self.assertEqual(OrderLine.objects.filter(order=order).count(), 2)
+        self.assertTrue(OrderLine.objects.filter(order=order, product_code="hoodie_black_embroidered").exists())
+        self.assertTrue(OrderLine.objects.filter(order=order, product_code="trackpants_black_embroidered").exists())
 import json
 import os
 
