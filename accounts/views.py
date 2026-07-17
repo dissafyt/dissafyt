@@ -43,7 +43,17 @@ class SignUpView(FormView):
         return context
 
     def form_valid(self, form):
+        logger = logging.getLogger(__name__)
         selected_plan = _get_selected_plan(self.request)
+        # If the plan wasn't resolved (session or DB hiccup), try falling back to POST/session plan_code
+        if not selected_plan:
+            plan_code = (self.request.POST.get("plan_code") or self.request.session.get("subscription_plan_code"))
+            if plan_code:
+                try:
+                    selected_plan = SubscriptionPlan.objects.filter(code=plan_code, active=True).first()
+                except DatabaseError:
+                    logger.exception("Database error resolving SubscriptionPlan fallback in SignUpView.form_valid")
+
         if not selected_plan:
             form.add_error(None, "Please choose a membership plan before creating your account.")
             return self.form_invalid(form)
