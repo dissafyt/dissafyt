@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Subscription Plans</h1>
+<ul>
+  {% for p in plans %}
+  <li>{{ p.name }} — R{{ p.price_cents|floatformat:-2 }} <a href="{% url 'haircuts:checkout' p.code %}">Subscribe</a></li>
+  {% endfor %}
+</ul>
+{% endblock %}

@@ -1,0 +1,22 @@
+[
+  {
+    "model": "haircuts.subscriptionplan",
+    "pk": 1,
+    "fields": {
+      "code": "monthly_basic",
+      "name": "Monthly Basic - 1 haircut",
+      "price_cents": 5000,
+      "interval": "monthly"
+    }
+  },
+  {
+    "model": "haircuts.subscriptionplan",
+    "pk": 2,
+    "fields": {
+      "code": "monthly_premium",
+      "name": "Monthly Premium - 2 haircuts",
+      "price_cents": 9000,
+      "interval": "monthly"
+    }
+  }
+]

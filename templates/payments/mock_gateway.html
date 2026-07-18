@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Mock Payment Gateway</h1>
+<p>Payment reference: {{ m_payment_id }}</p>
+<p>
+  <a href="{{ return_url }}">Simulate successful payment</a>
+</p>
+{% if cancel_url %}
+<p>
+  <a href="{{ cancel_url }}">Simulate cancel</a>
+</p>
+{% endif %}
+{% endblock %}

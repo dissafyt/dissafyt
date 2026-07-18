@@ -1,0 +1,29 @@
+[
+  {
+    "model": "store.product",
+    "pk": 1,
+    "fields": {
+      "code": "hoodie_black",
+      "name": "All-Black Hoodie",
+      "price_cents": 2500
+    }
+  },
+  {
+    "model": "store.product",
+    "pk": 2,
+    "fields": {
+      "code": "crewneck_black",
+      "name": "All-Black Crewneck",
+      "price_cents": 2000
+    }
+  },
+  {
+    "model": "store.product",
+    "pk": 3,
+    "fields": {
+      "code": "trackpants_black",
+      "name": "All-Black Trackpants",
+      "price_cents": 2200
+    }
+  }
+]

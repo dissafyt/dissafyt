@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Products</h1>
+<form method="post" action="{% url 'store:checkout' %}">
+  {% csrf_token %}
+  <ul>
+  {% for p in products %}
+    <li>
+      {{ p.name }} — R{{ p.price_cents|floatformat:-2 }}
+      <input type="hidden" name="items" value="{{ p.code }},1" />
+    </li>
+  {% endfor %}
+  </ul>
+  <button type="submit">Checkout</button>
+</form>
+{% endblock %}
