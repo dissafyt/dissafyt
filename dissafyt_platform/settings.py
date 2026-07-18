@@ -131,11 +131,10 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
 
-    # Core Dissafyt apps
-    "marketing",
-    "accounts",
-    "cms",
-    "websites",
+    # Minimal project apps
+    "haircuts",
+    "store",
+    "payments",
 ]
 
 MIDDLEWARE = [
